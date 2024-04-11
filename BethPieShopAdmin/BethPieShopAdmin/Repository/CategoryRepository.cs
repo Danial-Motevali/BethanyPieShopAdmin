@@ -16,12 +16,12 @@ namespace BethPieShopAdmin.Repository
 
         public IEnumerable<Category> GetAllCategories()
         {
-            return _context.categories.OrderBy(c => c.CategoryId);
+            return _context.categories.OrderBy(c => c.CategoryId).AsNoTracking();
         }
 
         public async Task<IEnumerable<Category>> GetAllCategoryAsync()
         {
-            return await _context.categories.OrderBy(c => c.CategoryId).ToListAsync();
+            return await _context.categories.AsNoTracking().OrderBy(c => c.CategoryId).ToListAsync();
         }
 
         public async Task<Category?> GetCategoryByIdAsync(int id)

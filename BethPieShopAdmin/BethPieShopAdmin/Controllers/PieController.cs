@@ -86,5 +86,90 @@ namespace BethPieShopAdmin.Controllers
 
             return View(input);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if(id == null)
+            {
+                return NotFound();
+            }
+
+            var allCategories = await _categoryRepo.GetAllCategoryAsync();
+
+            IEnumerable<SelectListItem> selectedListItem = new SelectList(allCategories, "CategoryId", "Name", null);
+
+            var selectedPie = await _pieRepo.GetPieByIdAsync(id.Value);
+
+            PieEditViewModel pieEditeViewModel = new ()
+            {
+                Categories = selectedListItem,
+                Pie = selectedPie
+            };
+
+            return View(pieEditeViewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(PieEditViewModel input)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    await _pieRepo.UpdatePieAsync(input.Pie);
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Update fild {ex.Message}");
+            }
+
+            var allCategories = await _categoryRepo.GetAllCategoryAsync();
+
+            IEnumerable<SelectListItem> selectListItems = new SelectList(allCategories, "CategoryId", "Name", null); 
+            input.Categories = selectListItems;
+
+            return View(input);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var selectedCategory = await _pieRepo.GetPieByIdAsync(id);
+
+            return View(selectedCategory);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(int? CategoryId)
+        {
+            if(CategoryId == null)
+            {
+                ViewData["ErrorMessage"] = "Deleting the category faild, InvalidId";
+
+                return View();
+            }
+
+            try
+            {
+                await _categoryRepo.DeleteCategoryAsync(CategoryId.Value);
+                TempData["CategoryId"] = "Category deleted successfully!";
+
+                return RedirectToAction(nameof(Index));
+
+            }catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = $"Deleting was faild {ex.Message}";
+            }
+
+            var selectedCategory = await _categoryRepo.GetCategoryByIdAsync(CategoryId.Value);
+
+            return View(selectedCategory);
+        }
     }
 }

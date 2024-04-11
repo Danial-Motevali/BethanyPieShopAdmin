@@ -59,5 +59,42 @@ namespace BethPieShopAdmin.Controllers
             
             return View(input);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var selectedCategory = await _categoryRepo.GetCategoryByIdAsync(id.Value);
+
+            return View(selectedCategory);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(Category input)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    await _categoryRepo.UpdateCategoryAsync(input);
+
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Update the category faild: {ex.Message}");
+            }
+
+            return View(input);
+        }
     }
 }

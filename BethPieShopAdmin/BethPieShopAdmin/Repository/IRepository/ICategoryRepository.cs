@@ -9,5 +9,7 @@ namespace BethPieShopAdmin.Repository.IRepository
         Task<IEnumerable<Category>> GetAllCategoryAsync();
 
         Task<Category?> GetCategoryByIdAsync(int id);
+
+        Task<int> AddCategoryAsync(Category category);
     }
 }

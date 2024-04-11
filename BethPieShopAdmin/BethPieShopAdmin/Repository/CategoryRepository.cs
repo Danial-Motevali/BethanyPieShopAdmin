@@ -14,6 +14,20 @@ namespace BethPieShopAdmin.Repository
             _context = context;
         }
 
+        public async Task<int> AddCategoryAsync(Category category)
+        {
+            bool categoryName = await _context.categories.AnyAsync(c => c.Name == category.Name);
+            
+            if(categoryName)
+            {
+                throw new Exception("A Category with the same name already exists");
+            }
+
+            _context.categories.Add(category);
+
+            return await _context.SaveChangesAsync();
+        }
+
         public IEnumerable<Category> GetAllCategories()
         {
             return _context.categories.OrderBy(c => c.CategoryId).AsNoTracking();

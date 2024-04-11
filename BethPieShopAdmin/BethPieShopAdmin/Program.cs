@@ -19,6 +19,8 @@ namespace BethPieShopAdmin
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefultConnection")));
 
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+            builder.Services.AddScoped<IPieRepository, PieRepository>();
+            builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
             //its get ef info if some thing gose wrong
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();

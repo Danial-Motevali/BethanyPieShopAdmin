@@ -11,14 +11,18 @@ namespace BethPieShopAdmin.Models
         public string Name { get; set; } = string.Empty;
 
         [StringLength(100)]
+        [Display(Name = "Short Description")]
         public string? ShortDescription { get; set; }
 
         [StringLength(1000)]
+        [Display(Name = "Long Description")]
         public string? LongDescription { get; set; }
 
         [StringLength(1000)]
+        [Display(Name = "Allergy information")]
         public string? AllergyInformation { get; set; }
 
+        [Display(Name = "Price")]
         public decimal Price { get; set; }
 
         public string? ImageUrl { get; set; }

@@ -1,14 +1,23 @@
-﻿@model IEnumerable<Pie>
-<h2>Pies</h2>
+﻿@model PieSearchViewModel
+
+<h2>Search pies</h2>
 <hr />
 
-@if (TempData["PieDeleted"] != null)
-{
-    <p class="text-success">@TempData["PieDeleted"]</p>
-}
+<form asp-controller="Pie" asp-action="Search" method="get">
+    <div class="mb-3">
+        <label class="form-label">Category</label>
+        <select asp-for="SearchCategory" asp-items="Model.Categories" class="form-control">
+            <option value="">All</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Search value</label>
+        <input type="text" asp-for="SearchQuery" class="form-control" />
+    </div>
+    <input type="submit" value="Filter" class="btn btn-primary" />
+</form>
 
-
-@if (!Model.Any())
+@if (!Model.Pies.Any())
 {
     <p>No results</p>
 }
@@ -16,6 +25,7 @@ else
 {
     <table class="table table-condensed table-bordered">
         <tr>
+
             <th>
                 Id
             </th>
@@ -27,7 +37,7 @@ else
             </th>
             <th>Actions</th>
         </tr>
-        @foreach (var pie in Model)
+        @foreach (var pie in Model.Pies)
         {
 
             <tr>
@@ -38,15 +48,9 @@ else
                     <a asp-action="Details" asp-route-id="@pie.PieId">Details</a>
                     <a asp-action="Edit" asp-route-id="@pie.PieId">Edit</a>
                     <a asp-action="Delete" asp-route-id="@pie.PieId">Delete</a>
-
                 </td>
             </tr>
         }
     </table>
 }
-
-<p>
-    <a class="btn btn-primary" asp-action="Add">Add new pie</a>
-</p>
-
 

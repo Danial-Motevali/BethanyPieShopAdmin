@@ -1,8 +1,10 @@
 ﻿using BethPieShopAdmin.Models;
 using BethPieShopAdmin.Repository.IRepository;
+using BethPieShopAdmin.Utilities;
 using BethPieShopAdmin.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace BethPieShopAdmin.Controllers
@@ -170,6 +172,34 @@ namespace BethPieShopAdmin.Controllers
             var selectedCategory = await _categoryRepo.GetCategoryByIdAsync(CategoryId.Value);
 
             return View(selectedCategory);
+        }
+
+        private int pageSize = 5;
+
+        public async Task<IActionResult> IndexPaging(int? pageNumber)
+        {
+            var pies = await _pieRepo.GetPiesPagedAsync(pageNumber, pageSize);
+            pageNumber ??= 1;
+
+            var count = await _pieRepo.GetAllPiesCountAsync();
+
+            return View(new PagedList<Pie>(pies.ToList(), count, pageNumber.Value, pageSize));
+        }
+
+        public async Task<IActionResult> IndexPagingSorting(string sortBy, int? pageNumber)
+        {
+            ViewData["CurrentSort"] = sortBy;
+            ViewData["IdSortParam"] = String.IsNullOrEmpty(sortBy) || sortBy == "id_desc" ? "id" : "id_desc";
+            ViewData["NameSortParam"] = sortBy == "name" ? "name_desc" : "name";
+            ViewData["PriceSortParam"] = sortBy == "price" ? "price_desc" : "price";
+
+            pageNumber ??= 1;
+
+            var pies = await _pieRepo.GetPiesSortedAndPagedAsync(sortBy, pageNumber, pageSize);
+
+            var count = await _pieRepo.GetAllPiesCountAsync();
+
+            return View(new PagedList<Pie>(pies.ToList(), count, pageNumber.Value, pageSize));
         }
     }
 }

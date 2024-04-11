@@ -1,5 +1,7 @@
 using BethPieShopAdmin.Data;
 using BethPieShopAdmin.Models.DataSeed;
+using BethPieShopAdmin.Repository;
+using BethPieShopAdmin.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 
 namespace BethPieShopAdmin
@@ -15,6 +17,8 @@ namespace BethPieShopAdmin
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefultConnection")));
+
+            builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
             //its get ef info if some thing gose wrong
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();

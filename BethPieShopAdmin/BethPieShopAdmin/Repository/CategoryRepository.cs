@@ -2,16 +2,20 @@
 using BethPieShopAdmin.Models;
 using BethPieShopAdmin.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace BethPieShopAdmin.Repository
 {
     public class CategoryRepository : ICategoryRepository
     {
         private readonly ApplicationDbContext _context;
+        private readonly IMemoryCache _memoryCache;
+        private const string AllCategoryCachName = "AllCategories";
 
-        public CategoryRepository(ApplicationDbContext context)
+        public CategoryRepository(IMemoryCache memoryCache, ApplicationDbContext context)
         {
             _context = context;
+            _memoryCache = memoryCache;
         }
 
         public async Task<int> AddCategoryAsync(Category category)
@@ -25,7 +29,11 @@ namespace BethPieShopAdmin.Repository
 
             _context.categories.Add(category);
 
-            return await _context.SaveChangesAsync();
+            int result = await _context.SaveChangesAsync();
+
+            _memoryCache.Remove(AllCategoryCachName);
+
+            return result;
         }
 
         public async Task<int> DeleteCategoryAsync(int id)
@@ -57,7 +65,18 @@ namespace BethPieShopAdmin.Repository
 
         public async Task<IEnumerable<Category>> GetAllCategoryAsync()
         {
-            return await _context.categories.AsNoTracking().OrderBy(c => c.CategoryId).ToListAsync();
+            List<Category> allCategories = null;
+
+            if(!_memoryCache.TryGetValue(AllCategoryCachName, out allCategories))
+            {
+                allCategories = await _context.categories.AsNoTracking().OrderBy(c => c.CategoryId).ToListAsync();
+
+                var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromSeconds(60));
+
+                _memoryCache.Set(AllCategoryCachName, allCategories, cacheEntryOptions);
+            }
+
+            return allCategories;
         }
 
         public async Task<Category?> GetCategoryByIdAsync(int id)

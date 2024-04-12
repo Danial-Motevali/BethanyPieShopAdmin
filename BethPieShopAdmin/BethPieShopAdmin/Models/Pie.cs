@@ -33,6 +33,9 @@ namespace BethPieShopAdmin.Models
 
         public bool InStock { get; set; }
 
+        [Timestamp]
+        public byte[]? RowVersion { get; set; }
+
         public int CategoryId { get; set; }
 
         public Category? Category { get; set; }

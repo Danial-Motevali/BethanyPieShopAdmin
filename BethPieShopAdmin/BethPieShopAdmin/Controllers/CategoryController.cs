@@ -96,5 +96,42 @@ namespace BethPieShopAdmin.Controllers
 
             return View(input);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> BulkEdit()
+        {
+            List<CategoryBulkEditViewModel> categoryBulkEditViewModel = new();
+
+            var allCategories = await _categoryRepo.GetAllCategoryAsync();
+            foreach(var category in allCategories)
+            {
+                categoryBulkEditViewModel.Add(new CategoryBulkEditViewModel
+                {
+                    CategoryId = category.CategoryId,
+                    Name = category.Name
+                });
+            }
+
+            return View(categoryBulkEditViewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> BulkEdit(List<CategoryBulkEditViewModel> input)
+        {
+            List<Category> categories = new();
+
+            foreach (var category in input)
+            {
+                categories.Add(new Category()
+                {
+                    CategoryId = category.CategoryId,
+                    Name = category.Name
+                });
+            }
+
+            await _categoryRepo.UpdateCategoryNameAsync(categories);
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

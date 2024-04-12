@@ -5,6 +5,7 @@ using BethPieShopAdmin.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace BethPieShopAdmin.Controllers
@@ -113,30 +114,95 @@ namespace BethPieShopAdmin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(PieEditViewModel input)
+        public async Task<IActionResult> Edit(Pie input)
         {
+            Pie pieToUpdate = await _pieRepo.GetPieByIdAsync(input.PieId);
+
             try
             {
+                if(pieToUpdate == null)
+                {
+                    ModelState.AddModelError(string.Empty, "cont find the pie");
+                }
+
                 if (ModelState.IsValid)
                 {
-                    await _pieRepo.UpdatePieAsync(input.Pie);
+                    await _pieRepo.UpdatePieAsync(input);
+
                     return RedirectToAction(nameof(Index));
+                }
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                var exceptionsPie = ex.Entries.Single();
+                var entityValues = (Pie)exceptionsPie.Entity;
+                var databsePie = exceptionsPie.GetDatabaseValues();
+
+                if (databsePie == null)
+                {
+                    ModelState.AddModelError(string.Empty, "The pie was deleted by some one else");
                 }
                 else
                 {
-                    return BadRequest();
+                    var databaseValues = (Pie)databsePie.ToObject();
+
+                    if(databaseValues.Name != entityValues.Name)
+                    {
+                        ModelState.AddModelError(string.Empty, $"current pie name {databaseValues.Name}");
+                    }
+                    
+                    if(databaseValues.Price != entityValues.Price)
+                    {
+                        ModelState.AddModelError(string.Empty, $"current pie price {databaseValues.Price}");
+                    }
+
+                    if(databaseValues.ShortDescription != entityValues.ShortDescription)
+                    {
+                        ModelState.AddModelError(string.Empty, $"current pie shortdescription {databaseValues.ShortDescription}");
+                    }
+
+                    if (databaseValues.LongDescription != entityValues.LongDescription)
+                    {
+                        ModelState.AddModelError(string.Empty, $"current pie longdescriptiono {databaseValues.LongDescription}");
+                    }
+
+                    if (databaseValues.AllergyInformation != entityValues.AllergyInformation)
+                    {
+                        ModelState.AddModelError(string.Empty, $"current pie allergyinformation {databaseValues.AllergyInformation}");
+                    }
+
+                    if (databaseValues.Ingredients != entityValues.Ingredients)
+                    {
+                        ModelState.AddModelError(string.Empty, $"current pie ingredients {databaseValues.Ingredients}");
+                    }
+
+                    if (databaseValues.CategoryId != entityValues.CategoryId)
+                    {
+                        ModelState.AddModelError(string.Empty, $"current pie categoryId {databaseValues.CategoryId}");
+                    }
+
+                    ModelState.AddModelError(string.Empty, "The Pie was modified already by another user");
+                    pieToUpdate.RowVersion = databaseValues.RowVersion;
+
+                    ModelState.Remove("Pie.RowVersion");
                 }
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
-                ModelState.AddModelError("", $"Update fild {ex.Message}");
+                ModelState.AddModelError(string.Empty, $"Update faild pleas try again leater {ex.Message}");
             }
 
             var allCategories = await _categoryRepo.GetAllCategoryAsync();
 
-            IEnumerable<SelectListItem> selectListItems = new SelectList(allCategories, "CategoryId", "Name", null); 
-            input.Categories = selectListItems;
+            IEnumerable<SelectListItem> selectListItems = new SelectList(allCategories, "CategoryId", "Name", null);
 
-            return View(input);
+            PieEditViewModel pieEditViewModel = new()
+            {
+                Categories = selectListItems,
+                Pie = pieToUpdate
+            };
+
+            return View(pieEditViewModel);
         }
 
         [HttpGet]

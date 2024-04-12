@@ -107,5 +107,26 @@ namespace BethPieShopAdmin.Repository
                 throw new ArgumentException($"This category cant be found");
             }
         }
+
+        public async Task<int> UpdateCategoryNameAsync(List<Category> categories)
+        {
+            foreach(var category in categories)
+            {
+                var categoryToUpdate = await _context.categories.FirstOrDefaultAsync(c => c.CategoryId == category.CategoryId);
+
+                if(categoryToUpdate != null)
+                {
+                    categoryToUpdate.Name = category.Name;
+
+                    _context.categories.Update(categoryToUpdate);
+                }
+            }
+
+            int result = await _context.SaveChangesAsync();
+
+            _memoryCache.Remove(AllCategoryCachName);
+
+            return result;
+        }
     }
 }

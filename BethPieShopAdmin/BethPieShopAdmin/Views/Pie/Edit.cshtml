@@ -5,12 +5,14 @@
 
 <form method="post" asp-controller="Pie" asp-action="Edit">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-    <input type="hidden" asp-for="Pie.PieId" />
+    <input type="hidden" asp-for="@Model.Pie.PieId" />
+    <input type="hidden" asp-for="Pie.RowVersion" />
+    @*<input type="hidden" asp-for="RowVersion" />*@
 
     <div class="mb-3">
-        <label asp-for="Pie.Name" class="form-label"></label>
-        <input asp-for="Pie.Name" class="form-control" />
-        <span asp-validation-for="Pie.Name" class="text-danger"></span>
+        <label asp-for="@Model.Pie.Name" class="form-label"></label>
+        <input asp-for="@Model.Pie.Name" class="form-control" />
+        <span asp-validation-for="@Model.Pie.Name" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
@@ -74,4 +76,3 @@
 <div>
     <a asp-controller="Pie" asp-action="Index">Back to overview</a>
 </div>
-
